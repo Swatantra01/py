@@ -1,0 +1,40 @@
+class Time:
+    def __init__(self, hour=0, minute=0, second=0):
+        self.hour = hour
+        self.minute = minute
+        self.second = second
+
+    def __add__(self, other):
+        seconds = self.second + other.second
+        minutes = self.minute + other.minute + seconds // 60
+        hours = self.hour + other.hour + minutes // 60
+        return Time(hours % 24, minutes % 60, seconds % 60)
+
+    def __sub__(self, other):
+        seconds = self.second - other.second
+        minutes = self.minute - other.minute - (1 if seconds < 0 else 0)
+        hours = self.hour - other.hour - (1 if minutes < 0 else 0)
+        return Time(hours % 24, minutes % 60, seconds % 60)
+
+    def __str__(self):
+        return f"{self.hour:02d}:{self.minute:02d}:{self.second:02d}"
+
+def read_time():
+    hour = int(input("Enter hour: "))
+    minute = int(input("Enter minute: "))
+    second = int(input("Enter second: "))
+    return Time(hour, minute, second)
+
+print("Enter first time:")
+time1 = read_time()
+
+print("Enter second time:")
+time2 = read_time()
+
+time_sum = time1 + time2
+time_diff = time1 - time2
+
+print(f"Time 1: {time1}")
+print(f"Time 2: {time2}")
+print(f"Sum of Time 1 and Time 2: {time_sum}")
+print(f"Difference of Time 1 and Time 2: {time_diff}")
