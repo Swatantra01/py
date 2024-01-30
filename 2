@@ -1,0 +1,47 @@
+def analyze_email(email):
+    vowels="aeiouAEIOU"
+    consonants="bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ"
+    digits="0123456789"
+
+    vowel_count=0
+    consonant_count=0
+    digit_count=0
+    space_count=0
+    
+    for char in email:
+        if char in vowels:
+            vowel_count+=1
+        elif char in consonants:
+            consonant_count+=1
+        elif char in digits:
+            digit_count+=1
+        elif char.isspace():
+            space_count+=1
+    print("Vowels",vowel_count)   
+    print("Consonants",consonant_count)   
+    print("Digits",digit_count)   
+    print("Whitespaces",space_count)   
+email = input("Enter your email ID: ")
+analyze_email(email)
+        
+
+def is_prime(n):
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+def sum_of_primes_below(limit):
+    return sum(n for n in range(2, limit) if is_prime(n))
+
+limit = int(input("Enter the limit (up to two million) for sum of primes calculation: "))
+sum_primes = sum_of_primes_below(limit)
+print(f"Sum of all primes below {limit}: {sum_primes}")
