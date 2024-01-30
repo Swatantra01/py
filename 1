@@ -1,0 +1,31 @@
+import math
+def euclidean_distance(point1,point2):
+    x1,y1=point1
+    x2,y2=point2
+    distance=math.sqrt((x2-x1)**2+(y2-y1)**2)
+    return distance
+def calculate_electricity_bill(units):
+ 
+    if units <= 100:
+        return 1.5 * units + 25.0
+    elif units <= 200:
+        return 1.5 * 100 + 25.0 + 2.5 * (units - 100) + 50.0
+    elif units <= 300:
+        return 1.5 * 100 + 25.0 + 2.5 * 100 + 50.0 + 4 * (units - 200) + 75.0
+    elif units <= 350:
+        return 1.5 * 100 + 25.0 + 2.5 * 100 + 50.0 + 4 * 100 + 75.0 + 7 * (units - 300) + 100.0
+    else:
+        return 1500.0
+
+
+print("Enter coordinates for the first point (x1, y1):")
+x1, y1 = map(float, input().split())
+print("Enter coordinates for the second point (x2, y2):")
+x2, y2 = map(float, input().split())
+distance = euclidean_distance((x1, y1), (x2, y2))
+print(f"Euclidean Distance between ({x1}, {y1}) and ({x2}, {y2}): {distance}")
+
+
+units = float(input("Enter the number of units for electricity bill calculation: "))
+bill = calculate_electricity_bill(units)
+print(f"Electricity bill for {units} units: ₹{bill}")
