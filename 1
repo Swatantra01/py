@@ -1,0 +1,88 @@
+import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_fscore_support, matthews_corrcoef, roc_auc_score
+import matplotlib.pyplot as plt
+
+# Load the Breast Cancer dataset
+data = load_breast_cancer()
+X = data.data
+y = data.target
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train a Decision Tree classifier
+clf = DecisionTreeClassifier(random_state=42)
+clf.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred = clf.predict(X_test)
+
+def calculate_confusion_matrix_elements(y_true, y_pred):
+    TP = np.sum((y_true == 1) & (y_pred == 1))
+    TN = np.sum((y_true == 0) & (y_pred == 0))
+    FP = np.sum((y_true == 0) & (y_pred == 1))
+    FN = np.sum((y_true == 1) & (y_pred == 0))
+    return TP, TN, FP, FN
+
+def calculate_metrics(TP, TN, FP, FN):
+    accuracy = (TP + TN) / (TP + TN + FP + FN)
+    precision = TP / (TP + FP) if TP + FP != 0 else 0
+    recall = TP / (TP + FN) if TP + FN != 0 else 0
+    specificity = TN / (TN + FP) if TN + FP != 0 else 0
+    npv = TN / (TN + FN) if TN + FN != 0 else 0
+    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) != 0 else 0
+    mcc = matthews_corrcoef(y_test, y_pred)
+    return accuracy, precision, recall, specificity, npv, f1_score, mcc
+
+# Calculate confusion matrix elements
+TP, TN, FP, FN = calculate_confusion_matrix_elements(y_test, y_pred)
+
+# Calculate metrics
+accuracy, precision, recall, specificity, npv, f1_score, mcc = calculate_metrics(TP, TN, FP, FN)
+
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+print(f"TP: {TP}, TN: {TN}, FP: {FP}, FN: {FN}")
+print(f"Confusion Matrix:\n{conf_matrix}")
+print(f"Accuracy: {accuracy}")
+print(f"Precision: {precision}")
+print(f"Recall (Sensitivity): {recall}")
+print(f"Specificity: {specificity}")
+print(f"Negative Predictive Value (NPV): {npv}")
+print(f"F1-Score: {f1_score}")
+print(f"Matthews Correlation Coefficient (MCC): {mcc}")
+
+# Predict probabilities
+y_pred_prob = clf.predict_proba(X_test)[:, 1]
+
+# Calculate ROC curve
+fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
+roc_auc = auc(fpr, tpr)
+
+# Random probabilities for comparison
+random_prob = np.random.rand(y_test.shape[0])
+fpr_random, tpr_random, _ = roc_curve(y_test, random_prob)
+roc_auc_random = auc(fpr_random, tpr_random)
+
+# Plot ROC curve
+plt.figure(figsize=(10, 6))
+plt.plot(fpr, tpr, color='blue', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot(fpr_random, tpr_random, color='red', lw=2, linestyle='--', label='Random ROC curve (area = %0.2f)' % roc_auc_random)
+plt.plot([0, 1], [0, 1], color='grey', lw=2, linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic (ROC) Curve')
+plt.legend(loc="lower right")
+plt.show()
+
+# Calculate AUC
+auc_test_data = roc_auc_score(y_test, y_pred_prob)
+auc_random = roc_auc_score(y_test, random_prob)
+
+print(f"AUC (Test Data): {auc_test_data}")
+print(f"AUC (Random Probabilities): {auc_random}")
