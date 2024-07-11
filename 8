@@ -1,0 +1,42 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+
+# Load the dataset
+data = pd.read_csv('CarPrice.csv')
+
+# Convert categorical data to numerical
+encoder = LabelEncoder()
+data['fueltype'] = encoder.fit_transform(data['fueltype'])
+
+# Selecting relevant features for clustering
+features = ['enginesize','horsepower']  # Adjusted features relevant to clustering
+
+# Normalize features
+scaler = StandardScaler()
+data_scaled = scaler.fit_transform(data[features])
+
+# Apply K-Means Clustering
+kmeans = KMeans(n_clusters=3, random_state=42)  # Number of clusters can be tuned
+clusters = kmeans.fit_predict(data_scaled)
+
+# Add cluster information back to the dataframe
+data['cluster'] = clusters
+
+
+# Visualize the clusters along with Fuel Type
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=data, x='enginesize', y='horsepower', hue='cluster', palette='viridis')
+plt.title('Clusters based on Present Price and Kms Driven')
+plt.xlabel('Present Price (normalized)')
+plt.ylabel('Kms Driven (normalized)')
+plt.legend(title='Cluster and Fuel Type')
+plt.show()
+
+# Interpret the results
+# Compare the cluster centroids and interpret their meaning
+centroids = pd.DataFrame(scaler.inverse_transform(kmeans.cluster_centers_), columns=features)
+print("Cluster centroids:\n", centroids)
