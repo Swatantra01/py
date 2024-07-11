@@ -1,37 +1,59 @@
-import numpy as np
-from sklearn.datasets import make_classification
+import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 from sklearn.naive_bayes import GaussianNB
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, mean_squared_error
+import numpy as np
 
-# Step 1: Create a synthetic dataset
-X, y = make_classification(n_samples=1000, n_features=10, n_classes=2, random_state=42)
+# Load the dataset
+data = pd.read_csv('iris1.csv')
 
-# Step 2: Split the dataset into training and testing sets
+# Correct column names by stripping extra spaces
+data.columns = data.columns.str.strip()
+
+# Split the data into features and target
+X = data.drop('Class',axis=1)
+y = data['Class']
+
+# Encode labels if they are categorical
+encoder = LabelEncoder()
+y = encoder.fit_transform(y)
+
+# Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Pre-processing: Standardize features
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-# Step 3: Initialize and train the Naive Bayes classifier
+# Train the Naive Bayes model
 model = GaussianNB()
-model.fit(X_train_scaled, y_train)
+model.fit(X_train, y_train)
 
-# Step 4: Predict the classes for the test set
-y_pred = model.predict(X_test_scaled)
+# Predict on new test data
+# Example new test data (the features should match the model's feature input)
+new_data = pd.DataFrame({
+    'Sepal_Length': [5.1, 7.2],
+    'Sepal_Width': [3.5, 3.6],
+    'Petal_Length': [1.4, 6.1],
+    'Petal_Width': [0.2, 2.5]
+})
+new_predictions = model.predict(new_data)
 
-# Print the predicted classes for the test set
-print("Predicted Classes for Test Data:")
-print(y_pred)
+# Decode labels to original
+new_predictions_labels = encoder.inverse_transform(new_predictions)
+print("New Predictions:", new_predictions_labels)
 
-# Step 5: Analyze the results
-accuracy = accuracy_score(y_test, y_pred)
+# Evaluate the model on the existing test set
+y_pred = model.predict(X_test)
 conf_matrix = confusion_matrix(y_test, y_pred)
-class_report = classification_report(y_test, y_pred)
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average='weighted')
+recall = recall_score(y_test, y_pred, average='weighted')
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
 
-print("\nAccuracy Score:", accuracy)
-print("\nConfusion Matrix:\n", conf_matrix)
-print("\nClassification Report:\n", class_report)
+# Print results
+print("Confusion Matrix:\n", conf_matrix)
+print("Accuracy: ", accuracy)
+print("Precision: ", precision)
+print("Recall: ", recall)
+print("MSE: ", mse)
+print("RMSE: ", rmse)
+
