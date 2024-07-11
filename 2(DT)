@@ -1,21 +1,51 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.datasets import load_iris
-from sklearn.tree import DecisionTreeClassifier, plot_tree
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
+from sklearn import tree
+import matplotlib.pyplot as plt
 
-iris=load_iris()
-X=iris.data
-y=iris.target
+# Load the dataset
+file_path = 'Play_Tennis.csv'
+tennis_data = pd.read_csv(file_path)
 
-X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2, random_state=42)
-dtree=DecisionTreeClassifier(criterion='entropy')
-dtree.fit(X_train,y_train)
+# Encode categorical variables
+encoder = LabelEncoder()
+for column in tennis_data.columns:
+    tennis_data[column] = encoder.fit_transform(tennis_data[column])
 
-plt.figure(figsize=(25,15))
-plot_tree(dtree, filled=True,feature_names=iris.feature_names,class_names=iris.target_names)
+# Features and target variable
+X = tennis_data.drop('play', axis=1)
+y = tennis_data['play']
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a Decision Tree model with entropy criterion
+decision_tree = DecisionTreeClassifier(criterion='entropy', random_state=42)
+decision_tree.fit(X_train, y_train)
+
+# Visualize the Decision Tree
+plt.figure(figsize=(20,10))
+tree.plot_tree(decision_tree, filled=True, feature_names=X.columns, class_names=['No', 'Yes'], fontsize=10)
 plt.show()
 
-newsamp=[[5.1,3.5,1.4,0.2]]
-pred=dtree.predict(newsamp)
-print(f'Predicted sample based on values: {iris.target_names[pred][0]}')
+# New sample conditions
+new_sample = pd.DataFrame([{
+    'outlook': 'rainy', 
+    'temp': 'hot', 
+    'humidity': 'high', 
+    'windy': True
+}])
+
+# Encode the new sample using the label encoder used for original data training
+for column in new_sample.columns:
+    le = LabelEncoder()
+    le.classes_ = encoder.classes_  # using the last encoder from the original data loop
+    new_sample[column] = le.fit_transform(new_sample[column])
+
+# Predict the outcome
+predicted_class = decision_tree.predict(new_sample)
+predicted_class_label = 'Yes' if predicted_class[0] == 1 else 'No'
+print("Prediction for new sample: ", predicted_class_label)
+
