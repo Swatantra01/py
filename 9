@@ -1,0 +1,34 @@
+import pandas as pd
+from scipy.cluster.hierarchy import dendrogram, linkage
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Load dataset (replace 'diabetes1.csv' with your actual dataset path)
+data = pd.read_csv('diabetes1.csv')
+
+# For demonstration, let's use only a subset of features
+X = data[['Glucose', 'BMI']].head(20)  # Selecting 'Glucose' and 'BMI' as features
+
+# Handle missing values by filling them with the mean of the column
+X.fillna(X.mean(), inplace=True)
+
+# Ensure there are no infinite values
+X = X.replace([np.inf, -np.inf], np.nan).dropna()
+
+# Hierarchical Clustering - AGNES
+Z_agnes = linkage(X, method='ward')  # Using 'ward' method for AGNES
+plt.figure(figsize=(10, 7))
+dendrogram(Z_agnes)
+plt.title('Dendrogram for AGNES')
+plt.xlabel('Samples')
+plt.ylabel('Distance')
+plt.show()
+
+# Hierarchical Clustering - DIANA
+Z_diana = linkage(X, method='single')  # Using 'single' method for DIANA
+plt.figure(figsize=(10, 7))
+dendrogram(Z_diana)
+plt.title('Dendrogram for DIANA')
+plt.xlabel('Samples')
+plt.ylabel('Distance')
+plt.show()
